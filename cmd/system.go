@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/user"
 	"path/filepath"
 	"runtime"
 	"strconv"
@@ -97,11 +98,15 @@ func (s *SystemHelper) setup() error {
 	// Try to load current values - ignore errors
 	config, _ := s.LoadConfig()
 
+	// Try to load the name from the existing config, or use the current user's name if that fails
 	if config.Name != "" {
 		systemConfig["name"] = PromptRequired("What is your name", config.Name)
+	} else if u, err := user.Current(); err == nil && u != nil {
+		systemConfig["name"] = PromptRequired("What is your name", u.Name)
 	} else {
 		systemConfig["name"] = PromptRequired("What is your name")
 	}
+
 	if config.Email != "" {
 		systemConfig["email"] = PromptRequired("What is your email address", config.Email)
 	} else {
